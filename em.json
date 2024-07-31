@@ -1,0 +1,37 @@
+{
+  "name": "kahlua",
+
+  "version": "0.1.0",
+
+  "dependencies": {},
+
+  "dev-dependencies": {
+    "cSpec": "Oblivious-Oblivious/cSpec"
+  },
+
+  "build": "",
+
+  "compile-flags": {
+    "cc": "clang",
+    "debug": {
+      "opt": "-Og -g",
+      "version": "-std=c89",
+      "flags": "-DLUA_USE_MACOSX -DLUA_USE_READLINE -lreadline -lm",
+      "warnings": "-Wall -Wextra -Werror -pedantic -pedantic-errors -Wpedantic"
+    },
+    "release": {
+      "opt": "-O2",
+      "version": "-std=c2x",
+      "flags": "-DLUA_USE_MACOSX -DLUA_USE_READLINE -lreadline -lm",
+      "warnings": ""
+    },
+    "test": {
+      "opt": "-Og -g",
+      "version": "-std=c89",
+      "flags": "",
+      "warnings": ""
+    }
+  },
+
+  "license": "mit"
+}

@@ -1,0 +1,119 @@
+#!/bin/bash
+
+cd .. && em build app release && cd examples
+cp ../export/kahlua ./
+
+if { ./kahlua bitwise.lua; } then
+  echo;
+else
+  echo "ERROR ON bitwise.lua";
+  exit;
+fi
+
+if { ./kahlua calls.lua; } then
+  echo;
+else
+  echo "ERROR ON calls.lua";
+  exit;
+fi
+
+if { ./kahlua closure.lua; } then
+  echo;
+else
+  echo "ERROR ON closure.lua";
+  exit;
+fi
+
+if { ./kahlua coroutine.lua; } then
+  echo;
+else
+  echo "ERROR ON coroutine.lua";
+  exit;
+fi
+
+if { ./kahlua cstack.lua; } then
+  echo;
+else
+  echo "ERROR ON cstack.lua";
+  exit;
+fi
+
+if { ./kahlua db.lua; } then
+  echo;
+else
+  echo "ERROR ON db.lua";
+  exit;
+fi
+
+if { ./kahlua errors.lua; } then
+  echo;
+else
+  echo "ERROR ON errors.lua";
+  exit;
+fi
+
+if { ./kahlua events.lua; } then
+  echo;
+else
+  echo "ERROR ON events.lua";
+  exit;
+fi
+
+if { ./kahlua goto.lua; } then
+  echo;
+else
+  echo "ERROR ON goto.lua";
+  exit;
+fi
+
+if { ./kahlua literals.lua; } then
+  echo;
+else
+  echo "ERROR ON literals.lua";
+  exit;
+fi
+
+if { ./kahlua locals.lua; } then
+  echo;
+else
+  echo "ERROR ON locals.lua";
+  exit;
+fi
+
+if { ./kahlua math.lua; } then
+  echo;
+else
+  echo "ERROR ON math.lua";
+  exit;
+fi
+
+if { ./kahlua nextvar.lua; } then
+  echo;
+else
+  echo "ERROR ON nextvar.lua";
+  exit;
+fi
+
+if { ./kahlua pm.lua; } then
+  echo;
+else
+  echo "ERROR ON pm.lua";
+  exit;
+fi
+
+if { ./kahlua vararg.lua; } then
+  echo;
+else
+  echo "ERROR ON vararg.lua";
+  exit;
+fi
+
+if { ./kahlua verybig.lua; } then
+  echo;
+else
+  echo "ERROR ON verybig.lua";
+  exit;
+fi
+
+echo "ALL TESTS PASSED"
+# ./kahlua heavy.lua
