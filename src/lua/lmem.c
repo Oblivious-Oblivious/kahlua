@@ -5,7 +5,7 @@
 */
 
 #define lmem_c
-#define LUA_CORE
+
 
 #include "lmem.h"
 
@@ -105,7 +105,7 @@ void *luaM_growaux_(
     return block;          /* nothing to be done */
   }
   if(size >= limit / 2) {           /* cannot double it? */
-    if(l_unlikely(size >= limit)) { /* cannot grow even a little? */
+    if(luai_unlikely(size >= limit)) { /* cannot grow even a little? */
       luaG_runerror(L, "too many %s (limit is %d)", what, limit);
     }
     size = limit; /* still have at least one free place */
@@ -185,7 +185,7 @@ void *luaM_realloc_(lua_State *L, void *block, size_t osize, size_t nsize) {
   global_State *g = G(L);
   lua_assert((osize == 0) == (block == NULL));
   newblock = firsttry(g, block, osize, nsize);
-  if(l_unlikely(newblock == NULL && nsize > 0)) {
+  if(luai_unlikely(newblock == NULL && nsize > 0)) {
     newblock = tryagain(L, block, osize, nsize);
     if(newblock == NULL) { /* still no memory? */
       return NULL;         /* do not update 'GCdebt' */
@@ -199,7 +199,7 @@ void *luaM_realloc_(lua_State *L, void *block, size_t osize, size_t nsize) {
 
 void *luaM_saferealloc_(lua_State *L, void *block, size_t osize, size_t nsize) {
   void *newblock = luaM_realloc_(L, block, osize, nsize);
-  if(l_unlikely(newblock == NULL && nsize > 0)) { /* allocation failed? */
+  if(luai_unlikely(newblock == NULL && nsize > 0)) { /* allocation failed? */
     luaM_error(L);
   }
   return newblock;
@@ -212,7 +212,7 @@ void *luaM_malloc_(lua_State *L, size_t size, int tag) {
   } else {
     global_State *g = G(L);
     void *newblock  = firsttry(g, NULL, tag, size);
-    if(l_unlikely(newblock == NULL)) {
+    if(luai_unlikely(newblock == NULL)) {
       newblock = tryagain(L, NULL, tag, size);
       if(newblock == NULL) {
         luaM_error(L);

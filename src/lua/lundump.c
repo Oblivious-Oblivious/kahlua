@@ -5,7 +5,7 @@
 */
 
 #define lundump_c
-#define LUA_CORE
+
 
 #include "lundump.h"
 

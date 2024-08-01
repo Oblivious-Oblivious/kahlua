@@ -5,7 +5,7 @@
 */
 
 #define lmathlib_c
-#define LUA_LIB
+
 
 #include "lauxlib.h"
 #include "lprefix.h"
@@ -72,7 +72,7 @@ static int math_atan(lua_State *L) {
 static int math_toint(lua_State *L) {
   int valid;
   lua_Integer n = lua_tointegerx(L, 1, &valid);
-  if(l_likely(valid)) {
+  if(luai_likely(valid)) {
     lua_pushinteger(L, n);
   } else {
     luaL_checkany(L, 1);
@@ -173,12 +173,10 @@ static int math_log(lua_State *L) {
     res = l_mathop(log)(x);
   } else {
     lua_Number base = luaL_checknumber(L, 2);
-#if !defined(LUA_USE_C89)
+
     if(base == l_mathop(2.0)) {
       res = l_mathop(log2)(x);
-    } else
-#endif
-      if(base == l_mathop(10.0)) {
+    } else if(base == l_mathop(10.0)) {
       res = l_mathop(log10)(x);
     } else {
       res = l_mathop(log)(x) / l_mathop(log)(base);
@@ -285,12 +283,6 @@ static int math_type(lua_State *L) {
     #define Rand64  unsigned long
     #define SRand64 long
 
-  #elif !defined(LUA_USE_C89) && defined(LLONG_MAX)
-
-    /* there is a 'long long' type (which must have at least 64 bits) */
-    #define Rand64  unsigned long long
-    #define SRand64 long long
-
   #elif((LUA_MAXUNSIGNED >> 31) >> 31) >= 3
 
     /* 'lua_Unsigned' has at least 64 bits */
@@ -368,14 +360,8 @@ static lua_Number I2d(Rand64 x) {
   #define Int2I(x) ((Rand64)(x))
 
 
-#else /* no 'Rand64'   }{ */
-
-  /* get an integer with at least 32 bits */
-  #if LUAI_IS32INT
-typedef unsigned int lu_int32;
-  #else
+#else /* no 'Rand64'  */
 typedef unsigned long lu_int32;
-  #endif
 
 
 /*

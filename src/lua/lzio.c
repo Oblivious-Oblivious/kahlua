@@ -5,7 +5,7 @@
 */
 
 #define lzio_c
-#define LUA_CORE
+
 
 #include "lzio.h"
 

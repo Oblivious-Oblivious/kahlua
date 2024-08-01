@@ -76,7 +76,7 @@
 
 
 /* one entry for each character and for -1 (EOZ) */
-LUAI_DDEC(const lu_byte luai_ctype_[UCHAR_MAX + 2];)
+extern const lu_byte luai_ctype_[UCHAR_MAX + 2];
 
 
 #else /* }{ */

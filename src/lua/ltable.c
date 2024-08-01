@@ -5,7 +5,7 @@
 */
 
 #define ltable_c
-#define LUA_CORE
+
 
 #include "lprefix.h"
 
@@ -346,7 +346,7 @@ findindex(lua_State *L, Table *t, TValue *key, unsigned int asize) {
     return i;          /* yes; that's the index */
   } else {
     const TValue *n = getgeneric(t, key, 1);
-    if(l_unlikely(isabstkey(n))) {
+    if(luai_unlikely(isabstkey(n))) {
       luaG_runerror(L, "invalid key to 'next'"); /* key not found */
     }
     i = cast_int(nodefromval(n) - gnode(t, 0)); /* key index in hash table */
@@ -585,7 +585,7 @@ void luaH_resize(
   }
   /* allocate new array */
   newarray = luaM_reallocvector(L, t->array, oldasize, newasize, TValue);
-  if(l_unlikely(newarray == NULL && newasize > 0)) { /* allocation failed? */
+  if(luai_unlikely(newarray == NULL && newasize > 0)) { /* allocation failed? */
     freehash(L, &newt);                              /* release new hash part */
     luaM_error(L); /* raise error (with array unchanged) */
   }
@@ -685,7 +685,7 @@ static void
 luaH_newkey(lua_State *L, Table *t, const TValue *key, TValue *value) {
   Node *mp;
   TValue aux;
-  if(l_unlikely(ttisnil(key))) {
+  if(luai_unlikely(ttisnil(key))) {
     luaG_runerror(L, "table index is nil");
   } else if(ttisfloat(key)) {
     lua_Number f = fltvalue(key);
@@ -693,7 +693,7 @@ luaH_newkey(lua_State *L, Table *t, const TValue *key, TValue *value) {
     if(luaV_flttointeger(f, &k, F2Ieq)) { /* does key fit in an integer? */
       setivalue(&aux, k);
       key = &aux; /* insert it as an integer */
-    } else if(l_unlikely(luai_numisnan(f))) {
+    } else if(luai_unlikely(luai_numisnan(f))) {
       luaG_runerror(L, "table index is NaN");
     }
   }

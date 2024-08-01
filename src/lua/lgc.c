@@ -5,7 +5,7 @@
 */
 
 #define lgc_c
-#define LUA_CORE
+
 
 #include "lgc.h"
 
@@ -991,7 +991,7 @@ static void GCTM(lua_State *L) {
     L->ci->callstatus &= ~CIST_FIN;    /* not running a finalizer anymore */
     L->allowhook = oldah;              /* restore hooks */
     g->gcstp     = oldgcstp;           /* restore state */
-    if(l_unlikely(status != LUA_OK)) { /* error while running __gc? */
+    if(luai_unlikely(status != LUA_OK)) { /* error while running __gc? */
       luaE_warnerror(L, "__gc");
       L->top.p--; /* pops error object */
     }

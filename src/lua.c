@@ -425,29 +425,15 @@ static int handle_luainit(lua_State *L) {
 ** lua_stdin_is_tty detects whether the standard input is a 'tty' (that
 ** is, whether we're running lua interactively).
 */
-#if !defined(lua_stdin_is_tty) /* { */
-
-  #if defined(LUA_USE_POSIX) /* { */
-
+#if !defined(lua_stdin_is_tty)
+  #if defined(LUA_USE_POSIX)
     #include <unistd.h>
     #define lua_stdin_is_tty() isatty(0)
-
-  #elif defined(LUA_USE_WINDOWS) /* }{ */
-
-    #include <io.h>
-    #include <windows.h>
-
-    #define lua_stdin_is_tty() _isatty(_fileno(stdin))
-
-  #else                          /* }{ */
-
+  #else
     /* ISO C definition */
-    #define lua_stdin_is_tty() 1 /* assume stdin is a tty */
-
-  #endif /* } */
-
-#endif /* } */
-
+    #define lua_stdin_is_tty() 1
+  #endif
+#endif
 
 /*
 ** lua_readline defines how to show a prompt and then read a line from

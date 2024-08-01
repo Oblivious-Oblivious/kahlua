@@ -5,7 +5,7 @@
 */
 
 #define lcode_c
-#define LUA_CORE
+
 
 #include "lcode.h"
 

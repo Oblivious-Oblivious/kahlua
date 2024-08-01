@@ -5,7 +5,7 @@
 */
 
 #define lutf8lib_c
-#define LUA_LIB
+
 
 #include "lauxlib.h"
 #include "lprefix.h"

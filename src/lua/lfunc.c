@@ -5,7 +5,7 @@
 */
 
 #define lfunc_c
-#define LUA_CORE
+
 
 #include "lfunc.h"
 

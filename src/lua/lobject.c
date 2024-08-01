@@ -5,7 +5,7 @@
 */
 
 #define lobject_c
-#define LUA_CORE
+
 
 #include "lobject.h"
 
@@ -190,94 +190,6 @@ static int isneg(const char **s) {
   return 0;
 }
 
-
-
-/*
-** {==================================================================
-** Lua's implementation for 'lua_strx2number'
-** ===================================================================
-*/
-
-#if !defined(lua_strx2number)
-
-  /* maximum number of significant digits to read (to avoid overflows
-     even with single floats) */
-  #define MAXSIGDIG 30
-
-/*
-** convert a hexadecimal numeric string to a number, following
-** C99 specification for 'strtod'
-*/
-static lua_Number lua_strx2number(const char *s, char **endptr) {
-  int dot      = lua_getlocaledecpoint();
-  lua_Number r = l_mathop(0.0); /* result (accumulator) */
-  int sigdig   = 0;             /* number of significant digits */
-  int nosigdig = 0;             /* number of non-significant digits */
-  int e        = 0;             /* exponent correction */
-  int neg;                      /* 1 if number is negative */
-  int hasdot = 0;               /* true after seen a dot */
-  *endptr    = cast_charp(s);   /* nothing is valid yet */
-  while(lisspace(cast_uchar(*s))) {
-    s++; /* skip initial spaces */
-  }
-  neg = isneg(&s);                                           /* check sign */
-  if(!(*s == '0' && (*(s + 1) == 'x' || *(s + 1) == 'X'))) { /* check '0x' */
-    return l_mathop(0.0); /* invalid format (no '0x') */
-  }
-  for(s += 2;; s++) { /* skip '0x' and read numeral */
-    if(*s == dot) {
-      if(hasdot) {
-        break; /* second dot? stop loop */
-      } else {
-        hasdot = 1;
-      }
-    } else if(lisxdigit(cast_uchar(*s))) {
-      if(sigdig == 0 && *s == '0') { /* non-significant digit (zero)? */
-        nosigdig++;
-      } else if(++sigdig <= MAXSIGDIG) { /* can read it without overflow? */
-        r = (r * l_mathop(16.0)) + luaO_hexavalue(*s);
-      } else {
-        e++; /* too many digits; ignore, but still count for exponent */
-      }
-      if(hasdot) {
-        e--; /* decimal digit? correct exponent */
-      }
-    } else {
-      break; /* neither a dot nor a digit */
-    }
-  }
-  if(nosigdig + sigdig == 0) { /* no digits? */
-    return l_mathop(0.0);      /* invalid format */
-  }
-  *endptr = cast_charp(s);     /* valid up to here */
-  e *= 4;                      /* each digit multiplies/divides value by 2^4 */
-  if(*s == 'p' || *s == 'P') { /* exponent part? */
-    int exp1 = 0;              /* exponent value */
-    int neg1;                  /* exponent sign */
-    s++;                       /* skip 'p' */
-    neg1 = isneg(&s);          /* sign */
-    if(!lisdigit(cast_uchar(*s))) {
-      return l_mathop(0.0); /* invalid; must have at least one digit */
-    }
-    while(lisdigit(cast_uchar(*s))) { /* read exponent */
-      exp1 = exp1 * 10 + *(s++) - '0';
-    }
-    if(neg1) {
-      exp1 = -exp1;
-    }
-    e += exp1;
-    *endptr = cast_charp(s); /* valid up to here */
-  }
-  if(neg) {
-    r = -r;
-  }
-  return l_mathop(ldexp)(r, e);
-}
-
-#endif
-/* }====================================================== */
-
-
 /* maximum length of a numeral to be converted to a number */
 #if !defined(L_MAXLENNUM)
   #define L_MAXLENNUM 200
@@ -290,8 +202,8 @@ static lua_Number lua_strx2number(const char *s, char **endptr) {
 */
 static const char *l_str2dloc(const char *s, lua_Number *result, int mode) {
   char *endptr;
-  *result = (mode == 'x') ? lua_strx2number(s, &endptr) /* try to convert */
-                          : lua_str2number(s, &endptr);
+  *result = (mode == 'x') ? strtod(s, &endptr) /* try to convert */
+                          : strtod(s, &endptr);
   if(endptr == s) {
     return NULL; /* nothing recognized? */
   }

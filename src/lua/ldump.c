@@ -5,7 +5,7 @@
 */
 
 #define ldump_c
-#define LUA_CORE
+
 
 #include "lobject.h"
 #include "lprefix.h"

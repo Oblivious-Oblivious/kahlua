@@ -5,7 +5,7 @@
 */
 
 #define ldo_c
-#define LUA_CORE
+
 
 #include "ldo.h"
 
@@ -229,7 +229,7 @@ int luaD_reallocstack(lua_State *L, int newsize, int raiseerror) {
     L, L->stack.p, oldsize + EXTRA_STACK, newsize + EXTRA_STACK, StackValue
   );
   G(L)->gcstopem = oldgcstop;        /* restore emergency collection */
-  if(l_unlikely(newstack == NULL)) { /* reallocation failed? */
+  if(luai_unlikely(newstack == NULL)) { /* reallocation failed? */
     correctstack(L);                 /* change offsets back to pointers */
     if(raiseerror) {
       luaM_error(L);
@@ -253,7 +253,7 @@ int luaD_reallocstack(lua_State *L, int newsize, int raiseerror) {
 */
 int luaD_growstack(lua_State *L, int n, int raiseerror) {
   int size = stacksize(L);
-  if(l_unlikely(size > LUAI_MAXSTACK)) {
+  if(luai_unlikely(size > LUAI_MAXSTACK)) {
     /* if stack is larger than maximum, thread is already using the
        extra space reserved for errors, that is, thread is handling
        a stack error; cannot grow further than that. */
@@ -271,7 +271,7 @@ int luaD_growstack(lua_State *L, int n, int raiseerror) {
     if(newsize < needed) { /* but must respect what was asked for */
       newsize = needed;
     }
-    if(l_likely(newsize <= LUAI_MAXSTACK)) {
+    if(luai_likely(newsize <= LUAI_MAXSTACK)) {
       return luaD_reallocstack(L, newsize, raiseerror);
     }
   }
@@ -437,7 +437,7 @@ static StkId tryfuncTM(lua_State *L, StkId func) {
   StkId p;
   checkstackGCp(L, 1, func);                   /* space for metamethod */
   tm = luaT_gettmbyobj(L, s2v(func), TM_CALL); /* (after previous GC) */
-  if(l_unlikely(ttisnil(tm))) {
+  if(luai_unlikely(ttisnil(tm))) {
     luaG_callerror(L, s2v(func)); /* nothing to call */
   }
   for(p = L->top.p; p > func; p--) { /* open space for metamethod */
@@ -514,7 +514,7 @@ l_sinline void moveresults(lua_State *L, StkId res, int nres, int wanted) {
 */
 void luaD_poscall(lua_State *L, CallInfo *ci, int nres) {
   int wanted = ci->nresults;
-  if(l_unlikely(L->hookmask && !hastocloseCfunc(wanted))) {
+  if(luai_unlikely(L->hookmask && !hastocloseCfunc(wanted))) {
     rethook(L, ci, nres);
   }
   /* move results to proper place */
@@ -553,7 +553,7 @@ precallC(lua_State *L, StkId func, int nresults, lua_CFunction f) {
   checkstackGCp(L, LUA_MINSTACK, func); /* ensure minimum stack size */
   L->ci = ci = prepCallInfo(L, func, nresults, CIST_C, L->top.p + LUA_MINSTACK);
   lua_assert(ci->top.p <= L->stack_last.p);
-  if(l_unlikely(L->hookmask & LUA_MASKCALL)) {
+  if(luai_unlikely(L->hookmask & LUA_MASKCALL)) {
     int narg = cast_int(L->top.p - func) - 1;
     luaD_hook(L, LUA_HOOKCALL, -1, 1, narg);
   }
@@ -664,7 +664,7 @@ retry:
 l_sinline void ccall(lua_State *L, StkId func, int nResults, l_uint32 inc) {
   CallInfo *ci;
   L->nCcalls += inc;
-  if(l_unlikely(getCcalls(L) >= LUAI_MAXCCALLS)) {
+  if(luai_unlikely(getCcalls(L) >= LUAI_MAXCCALLS)) {
     checkstackp(L, 0, func); /* free any use of EXTRA_STACK */
     luaE_checkcstack(L);
   }
@@ -710,7 +710,7 @@ void luaD_callnoyield(lua_State *L, StkId func, int nResults) {
 */
 static int finishpcallk(lua_State *L, CallInfo *ci) {
   int status = getcistrecst(ci);   /* get original status */
-  if(l_likely(status == LUA_OK)) { /* no error? */
+  if(luai_likely(status == LUA_OK)) { /* no error? */
     status = LUA_YIELD;            /* was interrupted by an yield */
   } else {                         /* error */
     StkId func   = restorestack(L, ci->u2.funcidx);
@@ -891,7 +891,7 @@ lua_resume(lua_State *L, lua_State *from, int nargs, int *nresults) {
   status = luaD_rawrunprotected(L, resume, &nargs);
   /* continue running after recoverable errors */
   status = precover(L, status);
-  if(l_likely(!errorstatus(status))) {
+  if(luai_likely(!errorstatus(status))) {
     lua_assert(status == L->status);       /* normal end or yield */
   } else {                                 /* unrecoverable error */
     L->status = cast_byte(status);         /* mark thread as 'dead' */
@@ -915,7 +915,7 @@ lua_yieldk(lua_State *L, int nresults, lua_KContext ctx, lua_KFunction k) {
   lua_lock(L);
   ci = L->ci;
   api_checknelems(L, nresults);
-  if(l_unlikely(!yieldable(L))) {
+  if(luai_unlikely(!yieldable(L))) {
     if(L != G(L)->mainthread) {
       luaG_runerror(L, "attempt to yield across a C-call boundary");
     } else {
@@ -970,7 +970,7 @@ int luaD_closeprotected(lua_State *L, ptrdiff_t level, int status) {
     pcl.level  = restorestack(L, level);
     pcl.status = status;
     status     = luaD_rawrunprotected(L, &closepaux, &pcl);
-    if(l_likely(status == LUA_OK)) { /* no more errors? */
+    if(luai_likely(status == LUA_OK)) { /* no more errors? */
       return pcl.status;
     } else { /* an error occurred; restore saved state and repeat */
       L->ci        = old_ci;
@@ -994,7 +994,7 @@ int luaD_pcall(
   ptrdiff_t old_errfunc  = L->errfunc;
   L->errfunc             = ef;
   status                 = luaD_rawrunprotected(L, func, u);
-  if(l_unlikely(status != LUA_OK)) { /* an error occurred? */
+  if(luai_unlikely(status != LUA_OK)) { /* an error occurred? */
     L->ci        = old_ci;
     L->allowhook = old_allowhooks;
     status       = luaD_closeprotected(L, old_top, status);

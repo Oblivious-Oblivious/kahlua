@@ -5,7 +5,7 @@
 */
 
 #define luac_c
-#define LUA_CORE
+
 
 #include "lua/lauxlib.h"
 #include "lua/ldebug.h"

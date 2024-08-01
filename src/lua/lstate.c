@@ -5,7 +5,7 @@
 */
 
 #define lstate_c
-#define LUA_CORE
+
 
 #include "lstate.h"
 
@@ -177,7 +177,7 @@ void luaE_checkcstack(lua_State *L) {
 
 LUAI_FUNC void luaE_incCstack(lua_State *L) {
   L->nCcalls++;
-  if(l_unlikely(getCcalls(L) >= LUAI_MAXCCALLS)) {
+  if(luai_unlikely(getCcalls(L) >= LUAI_MAXCCALLS)) {
     luaE_checkcstack(L);
   }
 }

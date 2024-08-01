@@ -5,7 +5,7 @@
 */
 
 #define lapi_c
-#define LUA_CORE
+
 
 #include "lapi.h"
 

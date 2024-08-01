@@ -5,7 +5,7 @@
 */
 
 #define lbaselib_c
-#define LUA_LIB
+
 
 #include "lauxlib.h"
 #include "lprefix.h"
@@ -146,7 +146,7 @@ static int luaB_setmetatable(lua_State *L) {
   int t = lua_type(L, 2);
   luaL_checktype(L, 1, LUA_TTABLE);
   luaL_argexpected(L, t == LUA_TNIL || t == LUA_TTABLE, 2, "nil or table");
-  if(l_unlikely(luaL_getmetafield(L, 1, "__metatable") != LUA_TNIL)) {
+  if(luai_unlikely(luaL_getmetafield(L, 1, "__metatable") != LUA_TNIL)) {
     return luaL_error(L, "cannot change a protected metatable");
   }
   lua_settop(L, 2);
@@ -355,7 +355,7 @@ static int luaB_ipairs(lua_State *L) {
 
 
 static int load_aux(lua_State *L, int status, int envidx) {
-  if(l_likely(status == LUA_OK)) {
+  if(luai_likely(status == LUA_OK)) {
     if(envidx != 0) {                 /* 'env' parameter? */
       lua_pushvalue(L, envidx);       /* environment for loaded function */
       if(!lua_setupvalue(L, -2, 1)) { /* set it as 1st upvalue */
@@ -410,7 +410,7 @@ static const char *generic_reader(lua_State *L, void *ud, size_t *size) {
     lua_pop(L, 1); /* pop result */
     *size = 0;
     return NULL;
-  } else if(l_unlikely(!lua_isstring(L, -1))) {
+  } else if(luai_unlikely(!lua_isstring(L, -1))) {
     luaL_error(L, "reader function must return a string");
   }
   lua_replace(L, RESERVEDSLOT); /* save string in reserved slot */
@@ -449,7 +449,7 @@ static int dofilecont(lua_State *L, int d1, lua_KContext d2) {
 static int luaB_dofile(lua_State *L) {
   const char *fname = luaL_optstring(L, 1, NULL);
   lua_settop(L, 1);
-  if(l_unlikely(luaL_loadfile(L, fname) != LUA_OK)) {
+  if(luai_unlikely(luaL_loadfile(L, fname) != LUA_OK)) {
     return lua_error(L);
   }
   lua_callk(L, 0, LUA_MULTRET, 0, dofilecont);
@@ -458,7 +458,7 @@ static int luaB_dofile(lua_State *L) {
 
 
 static int luaB_assert(lua_State *L) {
-  if(l_likely(lua_toboolean(L, 1))) {        /* condition is true? */
+  if(luai_likely(lua_toboolean(L, 1))) {        /* condition is true? */
     return lua_gettop(L);                    /* return all arguments */
   } else {                                   /* error */
     luaL_checkany(L, 1);                     /* there must be a condition */
@@ -496,7 +496,7 @@ static int luaB_select(lua_State *L) {
 ** ignored).
 */
 static int finishpcall(lua_State *L, int status, lua_KContext extra) {
-  if(l_unlikely(status != LUA_OK && status != LUA_YIELD)) { /* error? */
+  if(luai_unlikely(status != LUA_OK && status != LUA_YIELD)) { /* error? */
     lua_pushboolean(L, 0); /* first result (false) */
     lua_pushvalue(L, -2);  /* error message */
     return 2;              /* return false, msg */

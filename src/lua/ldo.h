@@ -24,7 +24,7 @@
 ** at every check.
 */
 #define luaD_checkstackaux(L, n, pre, pos)            \
-  if(l_unlikely(L->stack_last.p - L->top.p <= (n))) { \
+  if(luai_unlikely(L->stack_last.p - L->top.p <= (n))) { \
     pre;                                              \
     luaD_growstack(L, n, 1);                          \
     pos;                                              \

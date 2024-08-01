@@ -5,7 +5,7 @@
 */
 
 #define lstring_c
-#define LUA_CORE
+
 
 #include "lstring.h"
 
@@ -90,7 +90,7 @@ void luaS_resize(lua_State *L, int nsize) {
     tablerehash(tb->hash, osize, nsize); /* depopulate shrinking part */
   }
   newvect = luaM_reallocvector(L, tb->hash, osize, nsize, TString *);
-  if(l_unlikely(newvect == NULL)) {        /* reallocation failed? */
+  if(luai_unlikely(newvect == NULL)) {        /* reallocation failed? */
     if(nsize < osize) {                    /* was it shrinking table? */
       tablerehash(tb->hash, nsize, osize); /* restore to original size */
     }
@@ -180,7 +180,7 @@ void luaS_remove(lua_State *L, TString *ts) {
 
 
 static void growstrtab(lua_State *L, stringtable *tb) {
-  if(l_unlikely(tb->nuse == MAX_INT)) { /* too many strings? */
+  if(luai_unlikely(tb->nuse == MAX_INT)) { /* too many strings? */
     luaC_fullgc(L, 1);                  /* try to free some... */
     if(tb->nuse == MAX_INT) {           /* still too many? */
       luaM_error(L);                    /* cannot even create a message... */
@@ -234,7 +234,7 @@ TString *luaS_newlstr(lua_State *L, const char *str, size_t l) {
     return internshrstr(L, str, l);
   } else {
     TString *ts;
-    if(l_unlikely(l * sizeof(char) >= (MAX_SIZE - sizeof(TString)))) {
+    if(luai_unlikely(l * sizeof(char) >= (MAX_SIZE - sizeof(TString)))) {
       luaM_toobig(L);
     }
     ts = luaS_createlngstrobj(L, l);
@@ -273,7 +273,7 @@ Udata *luaS_newudata(lua_State *L, size_t s, int nuvalue) {
   Udata *u;
   int i;
   GCObject *o;
-  if(l_unlikely(s > MAX_SIZE - udatamemoffset(nuvalue))) {
+  if(luai_unlikely(s > MAX_SIZE - udatamemoffset(nuvalue))) {
     luaM_toobig(L);
   }
   o            = luaC_newobj(L, LUA_VUSERDATA, sizeudata(nuvalue, s));

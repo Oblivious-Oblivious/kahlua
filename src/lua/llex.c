@@ -5,7 +5,7 @@
 */
 
 #define llex_c
-#define LUA_CORE
+
 
 #include "llex.h"
 

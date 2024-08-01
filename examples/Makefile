@@ -1,4 +1,4 @@
-all:
+all: clean
 	./all_tests
 
 clean:

@@ -22,9 +22,6 @@
 #if defined(LUAI_MEM) /* { external definitions? */
 typedef LUAI_UMEM lu_mem;
 typedef LUAI_MEM l_mem;
-#elif LUAI_IS32INT      /* }{ */
-typedef size_t lu_mem;
-typedef ptrdiff_t l_mem;
 #else /* 16-bit ints */ /* }{ */
 typedef unsigned long lu_mem;
 typedef long l_mem;
@@ -75,8 +72,7 @@ typedef signed char ls_byte;
 ** value. (In strict ISO C this may cause undefined behavior, but no
 ** actual machine seems to bother.)
 */
-#if !defined(LUA_USE_C89) && defined(__STDC_VERSION__) && \
-  __STDC_VERSION__ >= 199901L
+#if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
   #include <stdint.h>
   #if defined(UINTPTR_MAX) /* even in C99 this type is optional */
     #define L_P2I uintptr_t
@@ -180,26 +176,14 @@ typedef LUAI_UACINT l_uacInt;
 /*
 ** Inline functions
 */
-#if !defined(LUA_USE_C89)
-  #define l_inline inline
-#elif defined(__GNUC__)
-  #define l_inline __inline__
-#else
-  #define l_inline /* empty */
-#endif
-
+#define l_inline  inline
 #define l_sinline static l_inline
-
 
 /*
 ** type for virtual-machine instructions;
 ** must be an unsigned with (at least) 4 bytes (see details in lopcodes.h)
 */
-#if LUAI_IS32INT
-typedef unsigned int l_uint32;
-#else
 typedef unsigned long l_uint32;
-#endif
 
 typedef l_uint32 Instruction;
 

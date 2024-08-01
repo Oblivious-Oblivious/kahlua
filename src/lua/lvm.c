@@ -5,7 +5,7 @@
 */
 
 #define lvm_c
-#define LUA_CORE
+
 
 #include "lvm.h"
 
@@ -249,13 +249,13 @@ static int forprep(lua_State *L, StkId ra) {
     lua_Number init;
     lua_Number limit;
     lua_Number step;
-    if(l_unlikely(!tonumber(plimit, &limit))) {
+    if(luai_unlikely(!tonumber(plimit, &limit))) {
       luaG_forerror(L, plimit, "limit");
     }
-    if(l_unlikely(!tonumber(pstep, &step))) {
+    if(luai_unlikely(!tonumber(pstep, &step))) {
       luaG_forerror(L, pstep, "step");
     }
-    if(l_unlikely(!tonumber(pinit, &init))) {
+    if(luai_unlikely(!tonumber(pinit, &init))) {
       luaG_forerror(L, pinit, "initial value");
     }
     if(step == 0) {
@@ -310,7 +310,7 @@ void luaV_finishget(
     if(slot == NULL) { /* 't' is not a table? */
       lua_assert(!ttistable(t));
       tm = luaT_gettmbyobj(L, t, TM_INDEX);
-      if(l_unlikely(notm(tm))) {
+      if(luai_unlikely(notm(tm))) {
         luaG_typeerror(L, t, "index"); /* no metamethod */
       }
       /* else will try the metamethod */
@@ -364,7 +364,7 @@ void luaV_finishset(
       /* else will try the metamethod */
     } else { /* not a table; check metamethod */
       tm = luaT_gettmbyobj(L, t, TM_NEWINDEX);
-      if(l_unlikely(notm(tm))) {
+      if(luai_unlikely(notm(tm))) {
         luaG_typeerror(L, t, "index");
       }
     }
@@ -713,7 +713,7 @@ void luaV_concat(lua_State *L, int total) {
       /* collect total length and number of strings */
       for(n = 1; n < total && tostring(L, s2v(top - n - 1)); n++) {
         size_t l = tsslen(tsvalue(s2v(top - n - 1)));
-        if(l_unlikely(l >= MAX_SIZE - sizeof(TString) - tl)) {
+        if(luai_unlikely(l >= MAX_SIZE - sizeof(TString) - tl)) {
           L->top.p = top - total; /* pop strings to avoid wasting stack */
           luaG_runerror(L, "string length overflow");
         }
@@ -760,7 +760,7 @@ void luaV_objlen(lua_State *L, StkId ra, const TValue *rb) {
   }
   default: { /* try metamethod */
     tm = luaT_gettmbyobj(L, rb, TM_LEN);
-    if(l_unlikely(notm(tm))) { /* no metamethod? */
+    if(luai_unlikely(notm(tm))) { /* no metamethod? */
       luaG_typeerror(L, rb, "get length of");
     }
     break;
@@ -777,7 +777,7 @@ void luaV_objlen(lua_State *L, StkId ra, const TValue *rb) {
 ** otherwise 'floor(q) == trunc(q) - 1'.
 */
 lua_Integer luaV_idiv(lua_State *L, lua_Integer m, lua_Integer n) {
-  if(l_unlikely(l_castS2U(n) + 1u <= 1u)) { /* special cases: -1 or 0 */
+  if(luai_unlikely(l_castS2U(n) + 1u <= 1u)) { /* special cases: -1 or 0 */
     if(n == 0) {
       luaG_runerror(L, "attempt to divide by zero");
     }
@@ -798,7 +798,7 @@ lua_Integer luaV_idiv(lua_State *L, lua_Integer m, lua_Integer n) {
 ** about luaV_idiv.)
 */
 lua_Integer luaV_mod(lua_State *L, lua_Integer m, lua_Integer n) {
-  if(l_unlikely(l_castS2U(n) + 1u <= 1u)) { /* special cases: -1 or 0 */
+  if(luai_unlikely(l_castS2U(n) + 1u <= 1u)) { /* special cases: -1 or 0 */
     if(n == 0) {
       luaG_runerror(L, "attempt to perform 'n%%0'");
     }
@@ -1183,7 +1183,7 @@ void luaV_finishOp(lua_State *L) {
 
 #define updatestack(ci)    \
   {                        \
-    if(l_unlikely(trap)) { \
+    if(luai_unlikely(trap)) { \
       updatebase(ci);      \
       ra = RA(i);          \
     }                      \
@@ -1259,7 +1259,7 @@ void luaV_finishOp(lua_State *L) {
 /* fetch an instruction and prepare its execution */
 #define vmfetch()                                                      \
   {                                                                    \
-    if(l_unlikely(trap)) {          /* stack reallocation or hooks? */ \
+    if(luai_unlikely(trap)) {          /* stack reallocation or hooks? */ \
       trap = luaG_traceexec(L, pc); /* handle hooks */                 \
       updatebase(ci);               /* correct stack */                \
     }                                                                  \
@@ -1286,7 +1286,7 @@ returning: /* trap already set */
   cl = ci_func(ci);
   k  = cl->p->k;
   pc = ci->u.l.savedpc;
-  if(l_unlikely(trap)) {
+  if(luai_unlikely(trap)) {
     trap = luaG_tracecall(L);
   }
   base = ci->func.p + 1;
@@ -1871,7 +1871,7 @@ returning: /* trap already set */
         goto ret;
       }
       vmcase(OP_RETURN0) {
-        if(l_unlikely(L->hookmask)) {
+        if(luai_unlikely(L->hookmask)) {
           StkId ra = RA(i);
           L->top.p = ra;
           savepc(ci);
@@ -1881,14 +1881,14 @@ returning: /* trap already set */
           int nres;
           L->ci    = ci->previous; /* back to caller */
           L->top.p = base - 1;
-          for(nres = ci->nresults; l_unlikely(nres > 0); nres--) {
+          for(nres = ci->nresults; luai_unlikely(nres > 0); nres--) {
             setnilvalue(s2v(L->top.p++)); /* all results are nil */
           }
         }
         goto ret;
       }
       vmcase(OP_RETURN1) {
-        if(l_unlikely(L->hookmask)) {
+        if(luai_unlikely(L->hookmask)) {
           StkId ra = RA(i);
           L->top.p = ra + 1;
           savepc(ci);
@@ -1903,7 +1903,7 @@ returning: /* trap already set */
             StkId ra = RA(i);
             setobjs2s(L, base - 1, ra); /* at least this result */
             L->top.p = base;
-            for(; l_unlikely(nres > 1); nres--) {
+            for(; luai_unlikely(nres > 1); nres--) {
               setnilvalue(s2v(L->top.p++)); /* complete missing results */
             }
           }
@@ -2021,7 +2021,7 @@ returning: /* trap already set */
       }
       vmcase(OP_VARARGPREP) {
         ProtectNT(luaT_adjustvarargs(L, GETARG_A(i), ci, cl->p));
-        if(l_unlikely(trap)) { /* previous "Protect" updated trap */
+        if(luai_unlikely(trap)) { /* previous "Protect" updated trap */
           luaD_hookcall(L, ci);
           L->oldpc = 1; /* next opcode will be seen as a "new" line */
         }

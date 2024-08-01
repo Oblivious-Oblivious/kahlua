@@ -5,7 +5,7 @@
 */
 
 #define ltm_c
-#define LUA_CORE
+
 
 #include "ltm.h"
 
@@ -25,7 +25,7 @@
 
 static const char udatatypename[] = "userdata";
 
-LUAI_DDEF const char *const luaT_typenames_[LUA_TOTALTYPES] = {
+const char *const luaT_typenames_[LUA_TOTALTYPES] = {
   "no value",
   "nil",
   "boolean",
@@ -166,7 +166,7 @@ static int callbinTM(
 void luaT_trybinTM(
   lua_State *L, const TValue *p1, const TValue *p2, StkId res, TMS event
 ) {
-  if(l_unlikely(!callbinTM(L, p1, p2, res, event))) {
+  if(luai_unlikely(!callbinTM(L, p1, p2, res, event))) {
     switch(event) {
     case TM_BAND:
     case TM_BOR:
@@ -190,7 +190,7 @@ void luaT_trybinTM(
 
 void luaT_tryconcatTM(lua_State *L) {
   StkId top = L->top.p;
-  if(l_unlikely(!callbinTM(L, s2v(top - 2), s2v(top - 1), top - 2, TM_CONCAT)
+  if(luai_unlikely(!callbinTM(L, s2v(top - 2), s2v(top - 1), top - 2, TM_CONCAT)
      )) {
     luaG_concaterror(L, s2v(top - 2), s2v(top - 1));
   }

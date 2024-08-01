@@ -5,7 +5,7 @@
 */
 
 #define liolib_c
-#define LUA_LIB
+
 
 #include "lauxlib.h"
 #include "lprefix.h"
@@ -50,36 +50,17 @@ static int l_checkmode(const char *mode) {
 ** =======================================================
 */
 
-#if !defined(l_popen) /* { */
-
-  #if defined(LUA_USE_POSIX) /* { */
-
+#if !defined(l_popen)
+  #if defined(LUA_USE_POSIX)
     #define l_popen(L, c, m)  (fflush(NULL), popen(c, m))
     #define l_pclose(L, file) (pclose(file))
-
-  #elif defined(LUA_USE_WINDOWS) /* }{ */
-
-    #define l_popen(L, c, m)  (_popen(c, m))
-    #define l_pclose(L, file) (_pclose(file))
-
-    #if !defined(l_checkmodep)
-      /* Windows accepts "[rw][bt]?" as valid modes */
-      #define l_checkmodep(m)            \
-        ((m[0] == 'r' || m[0] == 'w') && \
-         (m[1] == '\0' || ((m[1] == 'b' || m[1] == 't') && m[2] == '\0')))
-    #endif
-
-  #else /* }{ */
-
+  #else
     /* ISO C definitions */
     #define l_popen(L, c, m) \
       ((void)c, (void)m, luaL_error(L, "'popen' not supported"), (FILE *)0)
     #define l_pclose(L, file) ((void)L, (void)file, -1)
-
-  #endif /* } */
-
-#endif /* } */
-
+  #endif
+#endif
 
 #if !defined(l_checkmodep)
   /* By default, Lua accepts only "r" or "w" as valid modes */
@@ -110,34 +91,20 @@ static int l_checkmode(const char *mode) {
 ** =======================================================
 */
 
-#if !defined(l_fseek) /* { */
-
-  #if defined(LUA_USE_POSIX) /* { */
-
+#if !defined(l_fseek)
+  #if defined(LUA_USE_POSIX)
     #include <sys/types.h>
 
     #define l_fseek(f, o, w) fseeko(f, o, w)
     #define l_ftell(f)       ftello(f)
     #define l_seeknum        off_t
-
-  #elif defined(LUA_USE_WINDOWS) && !defined(_CRTIMP_TYPEINFO) && \
-    defined(_MSC_VER) && (_MSC_VER >= 1400) /* }{ */
-
-    /* Windows (but not DDK) and Visual C++ 2005 or higher */
-    #define l_fseek(f, o, w) _fseeki64(f, o, w)
-    #define l_ftell(f)       _ftelli64(f)
-    #define l_seeknum        __int64
-
-  #else /* }{ */
-
+  #else
     /* ISO C definitions */
     #define l_fseek(f, o, w) fseek(f, o, w)
     #define l_ftell(f)       ftell(f)
     #define l_seeknum        long
-
-  #endif /* } */
-
-#endif /* } */
+  #endif
+#endif
 
 /* }====================================================== */
 
@@ -185,7 +152,7 @@ static int f_tostring(lua_State *L) {
 
 static FILE *tofile(lua_State *L) {
   LStream *p = tolstream(L);
-  if(l_unlikely(isclosed(p))) {
+  if(luai_unlikely(isclosed(p))) {
     luaL_error(L, "attempt to use a closed file");
   }
   lua_assert(p->f);
@@ -263,7 +230,7 @@ static LStream *newfile(lua_State *L) {
 static void opencheck(lua_State *L, const char *fname, const char *mode) {
   LStream *p = newfile(L);
   p->f       = fopen(fname, mode);
-  if(l_unlikely(p->f == NULL)) {
+  if(luai_unlikely(p->f == NULL)) {
     luaL_error(L, "cannot open file '%s' (%s)", fname, strerror(errno));
   }
 }
@@ -315,7 +282,7 @@ static FILE *getiofile(lua_State *L, const char *findex) {
   LStream *p;
   lua_getfield(L, LUA_REGISTRYINDEX, findex);
   p = (LStream *)lua_touserdata(L, -1);
-  if(l_unlikely(isclosed(p))) {
+  if(luai_unlikely(isclosed(p))) {
     luaL_error(L, "default %s file is closed", findex + IOPREF_LEN);
   }
   return p->f;
@@ -440,7 +407,7 @@ typedef struct {
 ** Add current char to buffer (if not out of space) and read next one
 */
 static int nextc(RN *rn) {
-  if(l_unlikely(rn->n >= L_MAXLENNUM)) { /* buffer overflow? */
+  if(luai_unlikely(rn->n >= L_MAXLENNUM)) { /* buffer overflow? */
     rn->buff[0] = '\0';                  /* invalidate result */
     return 0;                            /* fail */
   } else {
@@ -493,7 +460,7 @@ static int read_number(lua_State *L, FILE *f) {
   do {
     rn.c = l_getc(rn.f);
   } while(isspace(rn.c)); /* skip spaces */
-  test2(&rn, "-+");       /* optional sign */
+  test2(&rn, "-+"); /* optional sign */
   if(test2(&rn, "00")) {
     if(test2(&rn, "xX")) {
       hex = 1; /* numeral is hexadecimal */
@@ -512,7 +479,7 @@ static int read_number(lua_State *L, FILE *f) {
   ungetc(rn.c, rn.f); /* unread look-ahead char */
   l_unlockfile(rn.f);
   rn.buff[rn.n] = '\0'; /* finish string */
-  if(l_likely(lua_stringtonumber(L, rn.buff))) {
+  if(luai_likely(lua_stringtonumber(L, rn.buff))) {
     return 1;       /* ok, it is a valid number */
   } else {          /* invalid format */
     lua_pushnil(L); /* "result" to be removed */
@@ -692,7 +659,7 @@ static int g_write(lua_State *L, FILE *f, int arg) {
       status        = status && (fwrite(s, sizeof(char), l, f) == l);
     }
   }
-  if(l_likely(status)) {
+  if(luai_likely(status)) {
     return 1; /* file handle already on stack top */
   } else {
     return luaL_fileresult(L, status, NULL);
@@ -724,7 +691,7 @@ static int f_seek(lua_State *L) {
   );
   errno = 0;
   op    = l_fseek(f, offset, mode[op]);
-  if(l_unlikely(op)) {
+  if(luai_unlikely(op)) {
     return luaL_fileresult(L, 0, NULL); /* error */
   } else {
     lua_pushinteger(L, (lua_Integer)l_ftell(f));
