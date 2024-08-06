@@ -503,7 +503,7 @@ static const luaL_Reg dblib[] = {
 };
 
 
-LUAMOD_API int luaopen_debug(lua_State *L) {
+extern int luaopen_debug(lua_State *L) {
   luaL_newlib(L, dblib);
   return 1;
 }

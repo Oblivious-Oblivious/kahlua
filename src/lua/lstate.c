@@ -98,7 +98,7 @@ void luaE_setdebt(global_State *g, l_mem debt) {
 }
 
 
-LUA_API int lua_setcstacklimit(lua_State *L, unsigned int limit) {
+extern int lua_setcstacklimit(lua_State *L, unsigned int limit) {
   UNUSED(L);
   UNUSED(limit);
   return LUAI_MAXCCALLS; /* warning?? */
@@ -175,7 +175,7 @@ void luaE_checkcstack(lua_State *L) {
 }
 
 
-LUAI_FUNC void luaE_incCstack(lua_State *L) {
+extern void luaE_incCstack(lua_State *L) {
   L->nCcalls++;
   if(luai_unlikely(getCcalls(L) >= LUAI_MAXCCALLS)) {
     luaE_checkcstack(L);
@@ -292,7 +292,7 @@ static void close_state(lua_State *L) {
 }
 
 
-LUA_API lua_State *lua_newthread(lua_State *L) {
+extern lua_State *lua_newthread(lua_State *L) {
   global_State *g = G(L);
   GCObject *o;
   lua_State *L1;
@@ -351,7 +351,7 @@ int luaE_resetthread(lua_State *L, int status) {
 }
 
 
-LUA_API int lua_closethread(lua_State *L, lua_State *from) {
+extern int lua_closethread(lua_State *L, lua_State *from) {
   int status;
   lua_lock(L);
   L->nCcalls = (from) ? getCcalls(from) : 0;
@@ -364,10 +364,10 @@ LUA_API int lua_closethread(lua_State *L, lua_State *from) {
 /*
 ** Deprecated! Use 'lua_closethread' instead.
 */
-LUA_API int lua_resetthread(lua_State *L) { return lua_closethread(L, NULL); }
+extern int lua_resetthread(lua_State *L) { return lua_closethread(L, NULL); }
 
 
-LUA_API lua_State *lua_newstate(lua_Alloc f, void *ud) {
+extern lua_State *lua_newstate(lua_Alloc f, void *ud) {
   int i;
   lua_State *L;
   global_State *g;
@@ -427,7 +427,7 @@ LUA_API lua_State *lua_newstate(lua_Alloc f, void *ud) {
 }
 
 
-LUA_API void lua_close(lua_State *L) {
+extern void lua_close(lua_State *L) {
   lua_lock(L);
   L = G(L)->mainthread; /* only the main thread can be closed */
   close_state(L);

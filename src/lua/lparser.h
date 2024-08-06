@@ -163,8 +163,8 @@ typedef struct FuncState {
 } FuncState;
 
 
-LUAI_FUNC int luaY_nvarstack(FuncState *fs);
-LUAI_FUNC LClosure *luaY_parser(
+extern int luaY_nvarstack(FuncState *fs);
+extern LClosure *luaY_parser(
   lua_State *L,
   ZIO *z,
   Mbuffer *buff,

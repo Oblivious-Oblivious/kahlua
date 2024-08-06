@@ -57,11 +57,6 @@
  * the mark is the module version, as in "mod-v1.2.so". */
 #define LUA_IGMARK "-"
 
-#define LUA_API    extern
-#define LUALIB_API LUA_API
-#define LUAMOD_API LUA_API
-#define LUAI_FUNC  extern
-
 /**
  * @param LUA_INTEGER_FRMLEN -> the length modifier for reading/writing
  * integers.

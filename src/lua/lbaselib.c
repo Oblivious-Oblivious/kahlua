@@ -458,7 +458,7 @@ static int luaB_dofile(lua_State *L) {
 
 
 static int luaB_assert(lua_State *L) {
-  if(luai_likely(lua_toboolean(L, 1))) {        /* condition is true? */
+  if(luai_likely(lua_toboolean(L, 1))) {     /* condition is true? */
     return lua_gettop(L);                    /* return all arguments */
   } else {                                   /* error */
     luaL_checkany(L, 1);                     /* there must be a condition */
@@ -571,7 +571,7 @@ static const luaL_Reg base_funcs[] = {
 };
 
 
-LUAMOD_API int luaopen_base(lua_State *L) {
+extern int luaopen_base(lua_State *L) {
   /* open lib into global table */
   lua_pushglobaltable(L);
   luaL_setfuncs(L, base_funcs, 0);

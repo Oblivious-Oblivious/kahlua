@@ -762,7 +762,7 @@ static void createclibstable(lua_State *L) {
 }
 
 
-LUAMOD_API int luaopen_package(lua_State *L) {
+extern int luaopen_package(lua_State *L) {
   createclibstable(L);
   luaL_newlib(L, pk_funcs); /* create 'package' table */
   createsearcherstable(L);

@@ -809,7 +809,7 @@ createstdfile(lua_State *L, FILE *f, const char *k, const char *fname) {
 }
 
 
-LUAMOD_API int luaopen_io(lua_State *L) {
+extern int luaopen_io(lua_State *L) {
   luaL_newlib(L, iolib); /* new module */
   createmeta(L);
   /* create (and set) default files */
